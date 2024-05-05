@@ -22,11 +22,19 @@ FTP_DOMAIN="$FTP_AUTH"
 
 # 安装系统依赖
 check_dependencies() {
-  DEPS_CHECK=("wget" "unzip" "ss" "tar")
-  DEPS_INSTALL=(" wget" " unzip" " iproute2" "tar")
-  for ((i=0;i<${#DEPS_CHECK[@]};i++)); do [[ ! $(type -p ${DEPS_CHECK[i]}) ]] && DEPS+=${DEPS_INSTALL[i]}; done
-  [ -n "$DEPS" ] && { apt-get update >/dev/null 2>&1; apt-get install -y $DEPS >/dev/null 2>&1; }
+  DEPS_CHECK=("wget" "unzip" "ss" "tar" "pgrep")
+  DEPS_INSTALL=("wget" "unzip" "iproute2" "tar" "procps")
+  for ((i=0;i<${#DEPS_CHECK[@]};i++)); do 
+    if ! type -p "${DEPS_CHECK[i]}" >/dev/null 2>&1; then 
+      DEPS="${DEPS}${DEPS_INSTALL[i]} "
+    fi
+  done
+  if [ -n "$DEPS" ]; then 
+    apk update >/dev/null 2>&1
+    apk add --no-cache $DEPS >/dev/null 2>&1
+  fi
 }
+
 
 # 生成 X 配置文件
 generate_config() {
